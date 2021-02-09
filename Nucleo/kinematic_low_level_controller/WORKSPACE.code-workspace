@@ -1,0 +1,29 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../.."
+		}
+	],
+	"settings": {
+		"python.autoComplete.extraPaths": [
+			"/media/storage/git/coral-agc/catkin_ws/devel/lib/python2.7/dist-packages",
+			"/opt/ros/melodic/lib/python2.7/dist-packages"
+		],
+		"files.associations": {
+			"bitset": "cpp",
+			"memory": "cpp",
+			"random": "cpp",
+			"future": "cpp",
+			"*.tpp": "cpp",
+			"mstd_memory": "cpp",
+			"optional": "cpp"
+		},
+		"python.analysis.extraPaths": [
+			"/media/storage/git/coral-agc/catkin_ws/devel/lib/python2.7/dist-packages",
+			"/opt/ros/melodic/lib/python2.7/dist-packages"
+		]
+	}
+}
