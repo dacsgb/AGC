@@ -111,10 +111,10 @@ void loop() {
 }
 
 void writeToMotor(float a){
-    digitalWrite(chipsel, LOW);
-      SPI.transfer(address);
-      SPI.transfer((int) a);           //write a to motor
-      digitalWrite(chipsel, HIGH);
+  digitalWrite(chipsel, LOW);
+  SPI.transfer(address);
+  SPI.transfer((int) a);           //write a to motor
+  digitalWrite(chipsel, HIGH);
 }
 
 float motor_control(){
@@ -161,10 +161,10 @@ float measure(){
   cartSpeed = rpmWheel*CircumWheel; 
   return cartSpeed;
 }
- 
+
 //ISR for left and right wheel
 void ISRL() {
- CountL++;
+CountL++;
 }
 
 void ISRR(){
