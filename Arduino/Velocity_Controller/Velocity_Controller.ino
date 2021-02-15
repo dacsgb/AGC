@@ -1,5 +1,6 @@
 #include <SPI.h>
 #include <ros.h>
+#include "pid_controller.hpp"
 
 // Encoder Variables
 #define ENCODER 2
