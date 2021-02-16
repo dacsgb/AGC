@@ -1,0 +1,5 @@
+Sensors/imu
+/home/max/projects/AGC/devel/.private/imu/cmake.lock /home/max/projects/AGC/devel/./cmake.lock
+/home/max/projects/AGC/devel/.private/imu/lib/pkgconfig/imu.pc /home/max/projects/AGC/devel/lib/pkgconfig/imu.pc
+/home/max/projects/AGC/devel/.private/imu/share/imu/cmake/imuConfig-version.cmake /home/max/projects/AGC/devel/share/imu/cmake/imuConfig-version.cmake
+/home/max/projects/AGC/devel/.private/imu/share/imu/cmake/imuConfig.cmake /home/max/projects/AGC/devel/share/imu/cmake/imuConfig.cmake

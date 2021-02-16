@@ -14,9 +14,9 @@ namespace automotive_navigation_msgs
     public:
       typedef uint64_t _guid_type;
       _guid_type guid;
-      typedef double _latitude_type;
+      typedef float _latitude_type;
       _latitude_type latitude;
-      typedef double _longitude_type;
+      typedef float _longitude_type;
       _longitude_type longitude;
       typedef const char* _params_type;
       _params_type params;
@@ -32,43 +32,18 @@ namespace automotive_navigation_msgs
     virtual int serialize(unsigned char *outbuffer) const
     {
       int offset = 0;
-      *(outbuffer + offset + 0) = (this->guid >> (8 * 0)) & 0xFF;
-      *(outbuffer + offset + 1) = (this->guid >> (8 * 1)) & 0xFF;
-      *(outbuffer + offset + 2) = (this->guid >> (8 * 2)) & 0xFF;
-      *(outbuffer + offset + 3) = (this->guid >> (8 * 3)) & 0xFF;
-      *(outbuffer + offset + 4) = (this->guid >> (8 * 4)) & 0xFF;
-      *(outbuffer + offset + 5) = (this->guid >> (8 * 5)) & 0xFF;
-      *(outbuffer + offset + 6) = (this->guid >> (8 * 6)) & 0xFF;
-      *(outbuffer + offset + 7) = (this->guid >> (8 * 7)) & 0xFF;
+      union {
+        uint64_t real;
+        uint32_t base;
+      } u_guid;
+      u_guid.real = this->guid;
+      *(outbuffer + offset + 0) = (u_guid.base >> (8 * 0)) & 0xFF;
+      *(outbuffer + offset + 1) = (u_guid.base >> (8 * 1)) & 0xFF;
+      *(outbuffer + offset + 2) = (u_guid.base >> (8 * 2)) & 0xFF;
+      *(outbuffer + offset + 3) = (u_guid.base >> (8 * 3)) & 0xFF;
       offset += sizeof(this->guid);
-      union {
-        double real;
-        uint64_t base;
-      } u_latitude;
-      u_latitude.real = this->latitude;
-      *(outbuffer + offset + 0) = (u_latitude.base >> (8 * 0)) & 0xFF;
-      *(outbuffer + offset + 1) = (u_latitude.base >> (8 * 1)) & 0xFF;
-      *(outbuffer + offset + 2) = (u_latitude.base >> (8 * 2)) & 0xFF;
-      *(outbuffer + offset + 3) = (u_latitude.base >> (8 * 3)) & 0xFF;
-      *(outbuffer + offset + 4) = (u_latitude.base >> (8 * 4)) & 0xFF;
-      *(outbuffer + offset + 5) = (u_latitude.base >> (8 * 5)) & 0xFF;
-      *(outbuffer + offset + 6) = (u_latitude.base >> (8 * 6)) & 0xFF;
-      *(outbuffer + offset + 7) = (u_latitude.base >> (8 * 7)) & 0xFF;
-      offset += sizeof(this->latitude);
-      union {
-        double real;
-        uint64_t base;
-      } u_longitude;
-      u_longitude.real = this->longitude;
-      *(outbuffer + offset + 0) = (u_longitude.base >> (8 * 0)) & 0xFF;
-      *(outbuffer + offset + 1) = (u_longitude.base >> (8 * 1)) & 0xFF;
-      *(outbuffer + offset + 2) = (u_longitude.base >> (8 * 2)) & 0xFF;
-      *(outbuffer + offset + 3) = (u_longitude.base >> (8 * 3)) & 0xFF;
-      *(outbuffer + offset + 4) = (u_longitude.base >> (8 * 4)) & 0xFF;
-      *(outbuffer + offset + 5) = (u_longitude.base >> (8 * 5)) & 0xFF;
-      *(outbuffer + offset + 6) = (u_longitude.base >> (8 * 6)) & 0xFF;
-      *(outbuffer + offset + 7) = (u_longitude.base >> (8 * 7)) & 0xFF;
-      offset += sizeof(this->longitude);
+      offset += serializeAvrFloat64(outbuffer + offset, this->latitude);
+      offset += serializeAvrFloat64(outbuffer + offset, this->longitude);
       uint32_t length_params = strlen(this->params);
       varToArr(outbuffer + offset, length_params);
       offset += 4;
@@ -80,45 +55,19 @@ namespace automotive_navigation_msgs
     virtual int deserialize(unsigned char *inbuffer)
     {
       int offset = 0;
-      this->guid =  ((uint64_t) (*(inbuffer + offset)));
-      this->guid |= ((uint64_t) (*(inbuffer + offset + 1))) << (8 * 1);
-      this->guid |= ((uint64_t) (*(inbuffer + offset + 2))) << (8 * 2);
-      this->guid |= ((uint64_t) (*(inbuffer + offset + 3))) << (8 * 3);
-      this->guid |= ((uint64_t) (*(inbuffer + offset + 4))) << (8 * 4);
-      this->guid |= ((uint64_t) (*(inbuffer + offset + 5))) << (8 * 5);
-      this->guid |= ((uint64_t) (*(inbuffer + offset + 6))) << (8 * 6);
-      this->guid |= ((uint64_t) (*(inbuffer + offset + 7))) << (8 * 7);
+      union {
+        uint64_t real;
+        uint32_t base;
+      } u_guid;
+      u_guid.base = 0;
+      u_guid.base |= ((uint32_t) (*(inbuffer + offset + 0))) << (8 * 0);
+      u_guid.base |= ((uint32_t) (*(inbuffer + offset + 1))) << (8 * 1);
+      u_guid.base |= ((uint32_t) (*(inbuffer + offset + 2))) << (8 * 2);
+      u_guid.base |= ((uint32_t) (*(inbuffer + offset + 3))) << (8 * 3);
+      this->guid = u_guid.real;
       offset += sizeof(this->guid);
-      union {
-        double real;
-        uint64_t base;
-      } u_latitude;
-      u_latitude.base = 0;
-      u_latitude.base |= ((uint64_t) (*(inbuffer + offset + 0))) << (8 * 0);
-      u_latitude.base |= ((uint64_t) (*(inbuffer + offset + 1))) << (8 * 1);
-      u_latitude.base |= ((uint64_t) (*(inbuffer + offset + 2))) << (8 * 2);
-      u_latitude.base |= ((uint64_t) (*(inbuffer + offset + 3))) << (8 * 3);
-      u_latitude.base |= ((uint64_t) (*(inbuffer + offset + 4))) << (8 * 4);
-      u_latitude.base |= ((uint64_t) (*(inbuffer + offset + 5))) << (8 * 5);
-      u_latitude.base |= ((uint64_t) (*(inbuffer + offset + 6))) << (8 * 6);
-      u_latitude.base |= ((uint64_t) (*(inbuffer + offset + 7))) << (8 * 7);
-      this->latitude = u_latitude.real;
-      offset += sizeof(this->latitude);
-      union {
-        double real;
-        uint64_t base;
-      } u_longitude;
-      u_longitude.base = 0;
-      u_longitude.base |= ((uint64_t) (*(inbuffer + offset + 0))) << (8 * 0);
-      u_longitude.base |= ((uint64_t) (*(inbuffer + offset + 1))) << (8 * 1);
-      u_longitude.base |= ((uint64_t) (*(inbuffer + offset + 2))) << (8 * 2);
-      u_longitude.base |= ((uint64_t) (*(inbuffer + offset + 3))) << (8 * 3);
-      u_longitude.base |= ((uint64_t) (*(inbuffer + offset + 4))) << (8 * 4);
-      u_longitude.base |= ((uint64_t) (*(inbuffer + offset + 5))) << (8 * 5);
-      u_longitude.base |= ((uint64_t) (*(inbuffer + offset + 6))) << (8 * 6);
-      u_longitude.base |= ((uint64_t) (*(inbuffer + offset + 7))) << (8 * 7);
-      this->longitude = u_longitude.real;
-      offset += sizeof(this->longitude);
+      offset += deserializeAvrFloat64(inbuffer + offset, &(this->latitude));
+      offset += deserializeAvrFloat64(inbuffer + offset, &(this->longitude));
       uint32_t length_params;
       arrToVar(length_params, (inbuffer + offset));
       offset += 4;

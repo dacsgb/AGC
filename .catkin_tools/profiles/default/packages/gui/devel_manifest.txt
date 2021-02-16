@@ -1,0 +1,9 @@
+HMI/gui
+/home/max/projects/AGC/devel/.private/gui/cmake.lock /home/max/projects/AGC/devel/./cmake.lock
+/home/max/projects/AGC/devel/.private/gui/lib/pkgconfig/gui.pc /home/max/projects/AGC/devel/lib/pkgconfig/gui.pc
+/home/max/projects/AGC/devel/.private/gui/lib/python2.7/dist-packages/gui/__init__.py /home/max/projects/AGC/devel/lib/python2.7/dist-packages/gui/__init__.py
+/home/max/projects/AGC/devel/.private/gui/share/roseus/ros/gui/manifest.l /home/max/projects/AGC/devel/share/roseus/ros/gui/manifest.l
+/home/max/projects/AGC/devel/.private/gui/share/gui/cmake/guiConfig.cmake /home/max/projects/AGC/devel/share/gui/cmake/guiConfig.cmake
+/home/max/projects/AGC/devel/.private/gui/share/gui/cmake/gui-msg-paths.cmake /home/max/projects/AGC/devel/share/gui/cmake/gui-msg-paths.cmake
+/home/max/projects/AGC/devel/.private/gui/share/gui/cmake/guiConfig-version.cmake /home/max/projects/AGC/devel/share/gui/cmake/guiConfig-version.cmake
+/home/max/projects/AGC/devel/.private/gui/share/gui/cmake/gui-msg-extras.cmake /home/max/projects/AGC/devel/share/gui/cmake/gui-msg-extras.cmake

@@ -1,0 +1,5 @@
+Perception/lateral_estimator
+/home/max/projects/AGC/devel/.private/lateral_estimator/cmake.lock /home/max/projects/AGC/devel/./cmake.lock
+/home/max/projects/AGC/devel/.private/lateral_estimator/lib/pkgconfig/lateral_estimator.pc /home/max/projects/AGC/devel/lib/pkgconfig/lateral_estimator.pc
+/home/max/projects/AGC/devel/.private/lateral_estimator/share/lateral_estimator/cmake/lateral_estimatorConfig-version.cmake /home/max/projects/AGC/devel/share/lateral_estimator/cmake/lateral_estimatorConfig-version.cmake
+/home/max/projects/AGC/devel/.private/lateral_estimator/share/lateral_estimator/cmake/lateral_estimatorConfig.cmake /home/max/projects/AGC/devel/share/lateral_estimator/cmake/lateral_estimatorConfig.cmake

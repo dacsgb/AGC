@@ -1,0 +1,5 @@
+Control/lateral_control
+/home/max/projects/AGC/devel/.private/lateral_control/cmake.lock /home/max/projects/AGC/devel/./cmake.lock
+/home/max/projects/AGC/devel/.private/lateral_control/lib/pkgconfig/lateral_control.pc /home/max/projects/AGC/devel/lib/pkgconfig/lateral_control.pc
+/home/max/projects/AGC/devel/.private/lateral_control/share/lateral_control/cmake/lateral_controlConfig-version.cmake /home/max/projects/AGC/devel/share/lateral_control/cmake/lateral_controlConfig-version.cmake
+/home/max/projects/AGC/devel/.private/lateral_control/share/lateral_control/cmake/lateral_controlConfig.cmake /home/max/projects/AGC/devel/share/lateral_control/cmake/lateral_controlConfig.cmake

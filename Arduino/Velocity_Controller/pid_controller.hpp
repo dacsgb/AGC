@@ -39,23 +39,31 @@ class PIDController {
      * @return float Control value
      */
     float computeControl(float setpoint, float measured, unsigned long timePassed) {
-        unsigned 
+        
         error = setpoint - measured;
-        integral = integral + (error * timePassed);
+        integral += error * timePassed * ki;
         derivative = (error - previousError) / timePassed;
 
-        float control = (error * kp) + (integral * ki) + (derivative * kd);
+        //Stop integral windup
+        if(integral > upperControlLimit) integral = upperControlLimit;
+        else if(integral < lowerControlLimit) integral = lowerControlLimit;
         
-        if(control >)
+        float control = (error * kp) + integral + (derivative * kd);
+
+        //Bound control term within correct range
+        if(control > upperControlLimit) control = upperControlLimit;
+        else if(control < lowerControlLimit) control = lowerControlLimit;
 
         previousError = error;
 
         return control;
-    }
+
+        //Room for improvement:
+        //derivative kick,
+        //PID handles frequency
+        //Changing frequency on the fly
+        //Changing tunings on the fly (works better with preset period)
+   }
 };
-
-
-
-
 
 #endif //PID_CONTROLLER_HPP

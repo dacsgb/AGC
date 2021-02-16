@@ -1,0 +1,5 @@
+HMI/sound_play
+/home/max/projects/AGC/devel/.private/sound_play/cmake.lock /home/max/projects/AGC/devel/./cmake.lock
+/home/max/projects/AGC/devel/.private/sound_play/lib/pkgconfig/sound_play.pc /home/max/projects/AGC/devel/lib/pkgconfig/sound_play.pc
+/home/max/projects/AGC/devel/.private/sound_play/share/sound_play/cmake/sound_playConfig.cmake /home/max/projects/AGC/devel/share/sound_play/cmake/sound_playConfig.cmake
+/home/max/projects/AGC/devel/.private/sound_play/share/sound_play/cmake/sound_playConfig-version.cmake /home/max/projects/AGC/devel/share/sound_play/cmake/sound_playConfig-version.cmake
