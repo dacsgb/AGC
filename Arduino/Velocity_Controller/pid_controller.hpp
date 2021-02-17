@@ -20,6 +20,8 @@ class PIDController {
 
     public:
 
+        float control;
+
         PIDController(float KP, float KI, float KD) {
             kp = KP;
             ki = KI;
@@ -37,7 +39,7 @@ class PIDController {
          * @param unsigned long milliseconds passed since last measure
          * @return float Control value
          */
-        float computeControl(float setpoint, float measured, unsigned long t1) {
+        void computeControl(float setpoint, float measured, unsigned long t1) {
             
             // Store current error and time into arrays
             error[1] = setpoint - measured;
@@ -49,7 +51,7 @@ class PIDController {
             integral += dintegral;
 
             // Calculate control input
-            float control = (kp*error[1]) + ki*integral + (kd*derivative);
+            control = (kp*error[1]) + ki*integral + (kd*derivative);
 
             // Intrgeal windup correction
             if((control > umax) || (control < umin)){
@@ -63,9 +65,7 @@ class PIDController {
             // Shift values in error and time array
             error[0] = error[1];
             time[0] = time[1];
-
-            return control;
-
+            
             //Room for improvement:
             //derivative kick,
             //PID handles frequency
