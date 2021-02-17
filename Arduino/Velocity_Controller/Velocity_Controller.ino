@@ -41,7 +41,7 @@ unsigned long speed_time[2];
 float v_meas;
 
 // Steering Wheel 
-#define STEERING_WHEEL_IN 2
+#define STEERING_WHEEL_IN 3
 
 // -------------------------------------- Controllers ---------------------------------------------------
 
