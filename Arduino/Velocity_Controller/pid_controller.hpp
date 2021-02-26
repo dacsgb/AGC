@@ -53,7 +53,7 @@ class PIDController {
             // Calculate control input
             control = (kp*error[1]) + ki*integral + (kd*derivative);
 
-            // Intrgeal windup correction
+            // Integral windup correction
             if((control > umax) || (control < umin)){
                 control -= ki*integral;
                 integral -= dintegral;

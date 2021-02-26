@@ -6,24 +6,24 @@
 // -------------------------------------- Actuators ---------------------------------------------------
 
 // Drive Motor
-#define MOTOR_SS 10
+#define MOTOR_SS 53
 #define CLOCK 13
 #define address 0x00
 
 // Brake Motor
-#define BRAKES_DRIVE 5
-#define BRAKES_ENABLE 3
+#define BRAKES_DRIVE 4
+#define BRAKES_INHIBIT 5
 
 // Steering Motor
-#define STEERING_DRIVE 7
-#define STEERING_ENABLE 4
+#define STEERING_DRIVE 6
+#define STEERING_INHIBIT 7
 
 // Gear Selector
-#define FORWARD 1
-#define BACKWARDS 13
+#define FORWARD 8
+#define BACKWARDS 9
 
 // Electromagnets
-#define ELECTROMAGNETS 5
+#define ELECTROMAGNETS 10
 
 // -------------------------------------- Sensors ---------------------------------------------------
 
@@ -33,7 +33,7 @@ float phi_meas;
 unsigned long steering_time;
 const float steeringFB_bounds[2] = {362,520};
 
-// Speed Potentiometer
+// Speed Encoder
 #define ENCODER_IN 2
 #define Ratio 38.4
 volatile int Count;
@@ -65,10 +65,10 @@ float v_thresh = -0.5;
 // ROS Setup
 ros::NodeHandle nh;
 ros::Subscriber<INSERT TOPIC TYPE HERE> sub(INSERT TOPIC NAME HERE, commandCB);
-ros::Publisher chatter("llc\feedback",INSERT MESSAGE HERE);
+ros::Publisher pub("llc\feedback", &msg);
 
 
-void commandCB(const INSERT_MESSAGE_TYPE msg){
+void commandCB(const INSERT_MESSAGE_TYPE& msg){
     autonomy = msg.INSERT_FIELD_HERE;
     V_sp = msg.INSERT_FIELD_HERE;
     phi_sp = msg.INSERT_FIELD_HERE;
@@ -85,11 +85,13 @@ void setup(){
 
     // Steering Motor Setup
     pinMode(STEERING_DRIVE,OUTPUT);
-    pinMode(STEERING_ENABLE,OUTPUT);
+    pinMode(STEERING_INHIBIT,OUTPUT);
+    digitalWrite(STEERING_INHIBIT,HIGH);            
 
     // Brake Motor Setup
     pinMode(BRAKES_DRIVE,OUTPUT);
-    pinMode(BRAKES_ENABLE,OUTPUT);
+    pinMode(BRAKES_INHIBIT,OUTPUT);
+    digitalWrite(BRAKES_INHIBIT,HIGH);
 
     // Steering Potentiometer Setup
     pinMode(STEERING_FB,INPUT);
@@ -105,10 +107,15 @@ void setup(){
     // Steering Whel Interrupt Setup
     pinMode(STEERING_WHEEL_IN,INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(ENCODER_IN),DISENGAGE,CHANGE);
+
+    // Electromagnet Setup
+    pinMode(ELECTROMAGNETS,OUTPUT);
+    electromagnet(true);
     
    // Start ROS
     nh.initNode();
-    nh.subsribe();
+    nh.subsribe(sub);
+    nh.advertise(pub);
 }
 
 void loop(){
@@ -121,40 +128,41 @@ void loop(){
         actuateSteering();
         actuateSpeed();
     }
-
     // Send Feedback to ROS
+    feedback();
+    nh.spinOnce();
 }
 
 void measureSteering(){
-    int pot =  analogRead(STEERING_FB);
     steering_time = millis();
-    phi_meas = map(pot,steeringFB_bounds[0],steeringFB_bounds[1],steeringU_bounds[0],steeringU_bounds[1])
+    phi_meas = map(analogRead(STEERING_FB),steeringFB_bounds[0],steeringFB_bounds[1],steeringU_bounds[0],steeringU_bounds[1])
 }
 
 void measureSpeed(){
-    time[1] = millis();
-    v_meas = (Count*Ratio)/(time[1]-time[0]);
-    time[0] = time[1];
+    speed_time[1] = millis();
+    v_meas = (Count*Ratio)/(speed_time[1]-speed_time[0]);
+    speed_time[0] = speed_time[1];
 }
 
 void actuateSteering(){
     Steering.computeControl(phi_sp,phi_meas,steering_time)
-    digitalWrite(STEERING_ENABLE, LOW);
+    digitalWrite(STEERING_INHIBIT, LOW);
     analogWrite(STEERING_DRIVE, int(Steering.control));
 }
 
 void actuateSpeed(){
     if((v_sp - v_meas + v_thresh) > 0){
         // Accelerating or coasting
-        actuateMotor();
+        actuateMotor(v_sp);
     }
-    if (v_sp-v_meas > v_thresh){
+    else if ((v_sp-v_meas + v_thresh) < 0 ){
         //Braking
-        actuateMotor();
+        actuateMotor(v_sp);
         actuateBrake();
     }
 }
 
+// TODO: Add reverse mapping and gear selection
 void actuateMotor(float u){
     u = map(u,V_bounds[0],V_bounds[1],Pot_bounds[0],Pot_bounds[1]);
     V_sp = max(V_bounds[0],min(V_bounds[1],V));
@@ -165,9 +173,25 @@ void actuateMotor(float u){
 }
 
 void actuateBrake(float u){
-    float u = 5;
-    digitalWrite(BRAKES_ENABLE,LOW);
+    digitalWrite(BRAKES_INHIBIT,LOW);
     analogWrite(BRAKES_DRIVE,int(u));
+}
+
+void electromagnet(bool state){
+    digitalWrite(ELECTROMAGNETS,state);
+}
+
+void halt(){
+    digitalWrite(BRAKES_INHIBIT,HIGH);
+    analogWrite(BRAKES_DRIVE,int(0));
+    
+    digitalWrite(STEERING_INHIBIT, HIGH);
+    analogWrite(STEERING_DRIVE, int(127.5));
+}
+
+void feedback(){
+
+    pub.publish(&msg);
 }
 
 void SPEED(){
@@ -176,4 +200,5 @@ void SPEED(){
 
 void DISENGAGE(){
     autonomy = false;
+    electromagnet(false);
 }

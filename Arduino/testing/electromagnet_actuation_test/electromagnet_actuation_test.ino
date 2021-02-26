@@ -41,12 +41,10 @@ void setup() {
 
 //Toggle solenoids every three seconds
 void loop() {
-
   delay(3000);
   toggle_solenoids();
   delay(3000);
   toggle_solenoids();
-
 }
 
 //Toggles solenoids on and off.
