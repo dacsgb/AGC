@@ -5,6 +5,7 @@
 
     <!-- Initialize HMI-->
     <node pkg="joystick" type="joystick.py" name="joystick_node"/>
+    <node pkg=""
 
     <!-- Initialize Controllers-->
     <node pkg="joy_control" type="joy_cont.py" name="joystick_controller"/>
