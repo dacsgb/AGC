@@ -1,0 +1,15 @@
+<launch>
+
+    <!-- Flir Left Camera-->
+    <node pkg="tf" type="static_transform_publisher" name="flir_left" args="1 0.5 0.5 0 0 0 1 /base /flir_left 100"/>
+
+    <!-- Flir Right Camera-->
+    <node pkg="tf" type="static_transform_publisher" name="flir_right" args="1 -0.5 0.5 0 0 0 1 /base /flir_right 100"/>
+    
+    <!-- Hokuyo Range Finder-->
+    <node pkg="tf" type="static_transform_publisher" name="hokuyo_tf" args="1 0 0.25 0 0 0 1 /base /hokuyo 100"/>
+
+    <!-- Vector Nav-->
+    <node pkg="tf" type="static_transform_publisher" name="vectornav_tf" args="0 0 1 0 0 0 1 /base /vectornav 100"/>
+
+</launch>

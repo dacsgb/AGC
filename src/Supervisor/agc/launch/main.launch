@@ -1,0 +1,18 @@
+<launch>
+
+    <!-- Initialize Sensors -->
+    <include file="$(find agc)/launch/sensors.launch" />
+
+    <!-- Initialize HMI-->
+    <node pkg="joystick" type="joystick.py" name="joystick_node"/>
+
+    <!-- Initialize Controllers-->
+    <node pkg="joy_control" type="joy_cont.py" name="joystick_controller"/>
+
+    <!-- Initilize Actuators-->
+
+    <!-- Testing-->
+    <node pkg="rviz" type="rviz" name="rviz_visualize"/>
+    <node pkg="sim" type="sim.py" name="kinematic_sim"/>
+
+</launch>
