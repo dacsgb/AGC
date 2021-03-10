@@ -2,13 +2,11 @@
 
 # Form implementation generated from reading ui file 'gui.ui'
 #
-# Created by: PyQt5 UI code generator 5.13.2
+# Created by: PyQt5 UI code generator 5.9.2
 #
 # WARNING! All changes made in this file will be lost!
 
-
 from PyQt5 import QtCore, QtGui, QtWidgets
-
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -61,3 +59,4 @@ class Ui_Dialog(object):
         self.label.setText(_translate("Dialog", "Speed"))
         self.start_but.setText(_translate("Dialog", "Start"))
         self.exit_but.setText(_translate("Dialog", "Exit"))
+
