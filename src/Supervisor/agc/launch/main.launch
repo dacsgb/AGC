@@ -5,7 +5,10 @@
 
     <!-- Initialize HMI-->
     <node pkg="joystick" type="joystick.py" name="joystick_node"/>
-    <node pkg=""
+    <!--node pkg="dashboard" type="dash.py" name="dashboard"/-->
+
+    <!-- Initialize Percepion-->
+    <node pkg="odometry" type="odom.py" name="odometry"/>
 
     <!-- Initialize Controllers-->
     <node pkg="joy_control" type="joy_cont.py" name="joystick_controller"/>
@@ -14,6 +17,5 @@
 
     <!-- Testing-->
     <node pkg="rviz" type="rviz" name="rviz_visualize"/>
-    <node pkg="sim" type="sim.py" name="kinematic_sim"/>
 
 </launch>
