@@ -7,7 +7,7 @@ from sensor_msgs.msg import Image, CompressedImage
 from cv_bridge import CvBridge, CvBridgeError
 
 class Node():
-    def __init__(self,width,height,fps):
+    def __init__(self,width,height,fps,cam):
         
         self.image_pub = rospy.Publisher("/camera/original",Image,queue_size=1)
         self.compressed_pub = rospy.Publisher("/camera/compressed",CompressedImage,queue_size=1)
@@ -17,7 +17,7 @@ class Node():
         
         self.bridge = CvBridge()
 
-        self.cap = cv2.VideoCapture(0)
+        self.cap = cv2.VideoCapture(cam)
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, float(width))
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, float(height))
 
@@ -36,11 +36,12 @@ class Node():
             self.rate.sleep()
     
 if __name__ == "__main__":
-    rospy.init_node("camera")
+    rospy.init_node("usb_camera")
 
     height = rospy.get_param('~height')
     width = rospy.get_param('~width')
     fps = rospy.get_param('~fps')
+    cam = rospy.get_param('~camera_num')
 
-    Camera = Node(width,height,fps)
+    Camera = Node(width,height,fps,cam)
     Camera.run()
