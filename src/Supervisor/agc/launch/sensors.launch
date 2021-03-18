@@ -1,15 +1,30 @@
 <launch>
 
-    <!-- Flir Left Camera-->
-    <node pkg="tf" type="static_transform_publisher" name="flir_left" args="1 0.5 0.5 0 0 0 1 /base /flir_left 100"/>
-
-    <!-- Flir Right Camera-->
-    <node pkg="tf" type="static_transform_publisher" name="flir_right" args="1 -0.5 0.5 0 0 0 1 /base /flir_right 100"/>
+    <!-- Flir Center Camera-->
+    <node pkg="tf" type="static_transform_publisher" name="flir_center" args="1.53 0 0.795 -0.5416752, 0.5416752, -0.4545195, 0.4545195 /base /flir_center 100"/>
     
+    <!-- USB Camera-->
+    <node pkg="camera" name="camera_feed" type="images.py">
+        <param name="width" value="300"/>
+        <param name="height" value="300"/>
+        <param name="fps"   value="30"/>
+    </node>
+
     <!-- Hokuyo Range Finder-->
-    <node pkg="tf" type="static_transform_publisher" name="hokuyo_tf" args="1 0 0.25 0 0 0 1 /base /hokuyo 100"/>
+    <node pkg="tf" type="static_transform_publisher" name="hokuyo_tf" args="1.97 0 0.11 0 0 0 1 /base /hokuyo 100"/>
+    <node name="urg_node" pkg="urg_node" type="urg_node" output="screen">
+        <param name="ip_address" value="192.168.0.10"/>
+        <param name="serial_port" value="/dev/ttyACM0"/>
+        <param name="serial_baud" value="115200"/>
+        <param name="frame_id" value="hokuyo"/>
+        <param name="calibrate_time" value="true"/>
+        <param name="publish_intensity" value="false"/>
+        <param name="publish_multiecho" value="false"/>
+        <param name="angle_min" value="-1.5707963"/>
+        <param name="angle_max" value="1.5707963"/>
+    </node>
 
     <!-- Vector Nav-->
-    <node pkg="tf" type="static_transform_publisher" name="vectornav_tf" args="0 0 1 0 0 0 1 /base /vectornav 100"/>
+    <node pkg="tf" type="static_transform_publisher" name="vectornav_tf" args="0 0 1.17 0.7071068, 0, 0.7071068, 0 /base /vectornav 100"/>
 
 </launch>

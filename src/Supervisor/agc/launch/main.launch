@@ -16,6 +16,6 @@
     <!-- Initilize Actuators-->
 
     <!-- Testing-->
-    <node pkg="rviz" type="rviz" name="rviz_visualize"/>
+    <!--node pkg="rviz" type="rviz" name="rviz_visualize"/-->
 
 </launch>
