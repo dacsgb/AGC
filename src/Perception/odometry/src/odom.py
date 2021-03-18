@@ -61,7 +61,7 @@ class Sim():
 
         t.transform.translation.x = self.cart.x[0]
         t.transform.translation.y = self.cart.x[1]
-        t.transform.translation.z = 0
+        t.transform.translation.z = 0.21
         q = tf_conversions.transformations.quaternion_from_euler(0, 0, self.cart.x[2])
         t.transform.rotation.x = q[0]
         t.transform.rotation.y = q[1]
@@ -88,7 +88,7 @@ class Sim():
 
         o.pose.pose.position.x = self.cart.x[0]
         o.pose.pose.position.y = self.cart.x[1]
-        o.pose.pose.position.z = 0.25
+        o.pose.pose.position.z = 0.21
 
         q = tf_conversions.transformations.quaternion_from_euler(0, 0, self.cart.x[2])
         o.pose.pose.orientation.x = q[0]
