@@ -31,7 +31,7 @@ class Particle():
         self.x[2] = self.x[2] + self.xdot[2]*(self.t[1]-self.t[0])
         self.t[0] = self.t[1]
 
-class Sim():
+class Node():
     def __init__(self):
 
         #Cart Variables
@@ -55,9 +55,9 @@ class Sim():
         t = TransformStamped()
 
         t.header.stamp = rospy.Time.now()
-        t.header.frame_id = "world"
+        t.header.frame_id = "odom"
 
-        t.child_frame_id = "base"
+        t.child_frame_id = "base_link"
 
         t.transform.translation.x = self.cart.x[0]
         t.transform.translation.y = self.cart.x[1]
@@ -82,9 +82,9 @@ class Sim():
         o = Odometry()
 
         o.header.stamp = rospy.Time.now()
-        o.header.frame_id = "world"
+        o.header.frame_id = "odom"
 
-        o.child_frame_id = "base"
+        o.child_frame_id = "base_link"
 
         o.pose.pose.position.x = self.cart.x[0]
         o.pose.pose.position.y = self.cart.x[1]
@@ -108,5 +108,5 @@ class Sim():
 
 if __name__ == "__main__":
     rospy.init_node("odometry")
-    Node = Sim()
-    Node.run()
+    Odometry = Node()
+    Odometry.run()

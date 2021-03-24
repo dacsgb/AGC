@@ -1,0 +1,5 @@
+<launch>
+
+<node pkg="tf" type="static_transform_publisher" name="vectornav_tf" args="0 0 1.17 0.7071068, 0, 0.7071068, 0 /base_link /vectornav 100"/>
+
+</launch>

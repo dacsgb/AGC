@@ -1,0 +1,10 @@
+<launch>
+
+    <node pkg="usb_cam_driver" name="usb_camera_feed" type="usb_camera.py">
+        <param name="width" value="300"/>
+        <param name="height" value="300"/>
+        <param name="fps"   value="30"/>
+        <param name="camera_num" value="0"/>
+    </node>
+
+</launch>

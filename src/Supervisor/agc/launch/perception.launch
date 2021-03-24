@@ -1,9 +1,0 @@
-<launch>
-
-    <!--Lane Range Estimator-->
-    <node pkg="lane_range_est" name="lane_range" type="estimator.py">
-        <param name="y_min" value="-1.5"/>
-        <param name="y_max" value="1.5"/>
-    </node>
-
-</launch>
