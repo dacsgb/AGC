@@ -104,7 +104,7 @@ void setup(){
     pinMode(ENCODER_IN,INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(ENCODER_IN),SPEED,CHANGE);
 
-    // Steering Whel Interrupt Setup
+    // Steering Wheel Interrupt Setup
     pinMode(STEERING_WHEEL_IN,INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(ENCODER_IN),DISENGAGE,CHANGE);
 
@@ -190,7 +190,6 @@ void halt(){
 }
 
 void feedback(){
-
     pub.publish(&msg);
 }
 

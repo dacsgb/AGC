@@ -18,27 +18,27 @@
 // Encoder Variables
 #define ENA 2
 #define ENB 3
-#define EncRatio 3.400166
-volatile unsigned long Ct = 0;
+#define EncRatio 0.0001292
+volatile long Ct = 0;
 unsigned long time[2] = {0,0};
 float speed = 0.0;
 
 // Test Variables
-int spiSP = 0.0;
-int brakeSP = 0.0;
+int spiSP = 120;
+int brakeSP = 0;
 float v = 0;
 float s = 0;
-int dt = 5;
+int dt = 10;
 bool done = false;
 
 void setup(){
     Serial.begin(115200);
 
     pinMode(CLOCK, OUTPUT);
-    pinMode(motorSS, OUTPUT):
+    pinMode(motorSS, OUTPUT);
     pinMode(relayPin, OUTPUT);
     digitalWrite(relayPin,LOW);
-    SPI.begin()
+    SPI.begin();
 
     pinMode(brakeA,OUTPUT);
     pinMode(brakeB,OUTPUT);
@@ -53,6 +53,7 @@ void setup(){
 }
 
 void loop(){
+/*
     if(done == false){
         motorInterface(spiSP);
         while(true){
@@ -63,10 +64,16 @@ void loop(){
             }
         }
         done = true;
-        brakeInterface(75);
-        delay(1000);
+        //brakeInterface(75);
+        //delay(1000);
     }
-    
+*/
+for(int i = 0; i <= 255; i+=5){
+  motorInterface(i);
+  Serial.println(i);
+  delay(250);
+}
+
 }
 
 void motorInterface(float u){
@@ -106,10 +113,10 @@ float measureSpeed(){
 }
 
 void measureDist(){
-    dist = Ct*EncRatio;
+    s = Ct*EncRatio;
 }
 
-void Report(){
+void Report(float v, float s){
     Serial.print("Speed: \t");
     Serial.print(v,4);
     Serial.print("Distance: \t");
@@ -117,8 +124,8 @@ void Report(){
 }
 
 void CountA(){
-  bool EnA_status = digitalRead(EnA);
-  bool EnB_status = digitalRead(EnB);
+  bool EnA_status = digitalRead(ENA);
+  bool EnB_status = digitalRead(ENB);
   if(EnB_status == LOW){
     if(EnA_status == HIGH){
       Ct --;
@@ -138,8 +145,8 @@ void CountA(){
 }
 
 void CountB(){
-  bool EnA_status = digitalRead(EnA);
-  bool EnB_status = digitalRead(EnB);
+  bool EnA_status = digitalRead(ENA);
+  bool EnB_status = digitalRead(ENB);
   if(EnA_status == LOW){
     if(EnB_status == HIGH){
       Ct ++;
