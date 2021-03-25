@@ -4,7 +4,7 @@ import numpy as np
 import time
 
 import rospy
-from automotive_platform_msgs.msg import Speed, SteeringCommand
+from agc.msg import Ackerman
 from sensor_msgs.msg import BatteryState
 from GUI import Ui_Dialog
 
@@ -18,8 +18,7 @@ class Node():
     def __init__(self):
 
         # ROS Subscribers
-        self.steer_sub = rospy.Subscriber('/CMD/steer', SteeringCommand, self.steer_cb)
-        self.speed_sub = rospy.Subscriber('/CMD/speed', Speed,self.speed_cb)
+        self.fb_sub = rospy.Subscriber('/fb/inputs', Ackerman, self.fb_cb)
         self.batt_sub = rospy.Subscriber('/LLC/battery',BatteryState,self.batt_cb)
         #self.auto_sub = rospy.Subscriber('/SUP/autonomy', ,self.auto_cb)
 
@@ -27,17 +26,15 @@ class Node():
         #self.auto_pub = rospy.Publisher('/HMI/autonomy',,queue_size=1)
 
         # Message Variables
-        self.steer = SteeringCommand()
-        self.speed = Speed()
-        self.battery = BatteryState()
+        self.ϕ = 0.0
+        self.v = 0.0
+        self.V_battery = 0.0
         #self.auto = Auto()
 
-    def speed_cb(self,msg):
-        self.speed = msg
+    def fb_cb(self,msg):
+        self.speed = msg.velocity
+        self.steer = msg.steering_angle
     
-    def steer_cb(self,msg):
-        self.steer = msg
-
     def batt_cb(self,msg):
         self.battery= msg
 
