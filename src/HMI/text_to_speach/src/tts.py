@@ -8,10 +8,10 @@ from std_msgs.msg import String
 class TTS():
     def __init__(self):
         self.engine = pyttsx3.init()
-        self.engine.setProperty('rate',175)
+        self.engine.setProperty('rate',120)
 
-        self.text_sub = rospy.Subscriber("/text",String,self.text_cb)
-        self.rate = rospy.Rate(5)
+        #self.text_sub = rospy.Subscriber("/text",String,self.text_cb)
+        #self.rate = rospy.Rate(5)
 
     def text_cb(self,msg):
         self.say(msg.data)
@@ -24,7 +24,7 @@ class TTS():
         self.rate.sleep()
 
 if __name__ == "__main__":
-    rospy.init_node("tts")
+    #rospy.init_node("tts")
 
     Node = TTS()
-    Node.say("All systems are operational")
+    Node.say("Attack mode initiated. Searching for orange baggers")
