@@ -19,7 +19,8 @@ class TTS():
         self.engine.runAndWait()
     
     def run(self):
-        self.rate.sleep()
+        while not rospy.is_shutdown():
+            self.rate.sleep()
 
 if __name__ == "__main__":
     rospy.init_node("tts")
