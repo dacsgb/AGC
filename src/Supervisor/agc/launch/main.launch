@@ -1,19 +1,20 @@
 <launch>
 
     <!-- Initialize Sensors -->
-    <include file="$(find agc)/launch/sensors.launch" />
+    <!--include file="$(find agc)/launch/sensors.launch" /-->
 
     <!-- Initialize HMI-->
-    <node pkg="joystick" type="joystick.py" name="joystick_node"/>
+    <!--node pkg="joystick" type="joystick.py" name="joystick_node"/-->
     <!--node pkg="dashboard" type="dash.py" name="dashboard"/-->
+    <node pkg="rosserial_python" type="serial_node.py" name="led_serial" args="_port:=/dev/ttyACM0 _baud:=57600" respawn="true"/>
+    <node pkg="text_to_speach" type="tts.py" name="tts_node" respawn="true"/>
 
     <!-- Initialize Percepion-->
-    <node pkg="odometry" type="odom.py" name="odometry"/>
+    <!--node pkg="odometry" type="odom.py" name="odometry"/-->
 
     <!-- Initialize Controllers-->
-    <node pkg="joy_control" type="joy_cont.py" name="joystick_controller"/>
+    <!--node pkg="joy_control" type="joy_cont.py" name="joystick_controller"/-->
 
     <!-- Initilize Actuators-->
-
-
+    
 </launch>
