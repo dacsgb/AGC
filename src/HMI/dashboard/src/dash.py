@@ -4,8 +4,7 @@ import numpy as np
 import time
 
 import rospy
-from agc.msg import Ackerman
-from sensor_msgs.msg import BatteryState
+from agc.msgs import AGC, Auto
 from GUI import Ui_Dialog
 
 import sys
@@ -18,29 +17,23 @@ class Node():
     def __init__(self):
 
         # ROS Subscribers
-        self.fb_sub = rospy.Subscriber('/fb/inputs', Ackerman, self.fb_cb)
-        self.batt_sub = rospy.Subscriber('/LLC/battery',BatteryState,self.batt_cb)
-        #self.auto_sub = rospy.Subscriber('/SUP/autonomy', ,self.auto_cb)
+        self.fb_sub = rospy.Subscriber("\llc\feedback",AGC, self.fb_cb)
+        self.sup_sub = rospy.Subscriber("\supervisor\autonomy", Auto,self.auto_cb)
 
         # Ros Publishers
-        #self.auto_pub = rospy.Publisher('/HMI/autonomy',,queue_size=1)
+        self.auto_pub = rospy.Publisher('dahsboard\autonomy',Auto,queue_size=1)
 
         # Message Variables
         self.ϕ = 0.0
         self.v = 0.0
-        self.V_battery = 0.0
-        #self.auto = Auto()
+        self.auto = False
 
     def fb_cb(self,msg):
-        self.speed = msg.velocity
-        self.steer = msg.steering_angle
-    
-    def batt_cb(self,msg):
-        self.battery= msg
+        self.v = msg.speed
+        self.ϕ = msg.steering_angle
 
     def auto_cb(self,msg):
-        #self.auto = Auto()
-        pass
+        self.auto = msg.autonomous
 
 class main_window(QDialog):
     def __init__(self,node):
@@ -74,7 +67,6 @@ class main_window(QDialog):
     def update(self):
         self.ui.steer_lcd.display(np.rad2deg(self.node.steer.steering_wheel_angle))
         self.ui.speed_lcd.display(self.node.speed.speed)
-        self.ui.battery_lcd.display(self.node.battery.voltage)
         '''
             if state = enabled:
                 self.ui.auto_state.text("Enabled")
