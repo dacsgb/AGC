@@ -1,8 +1,8 @@
 #include <SPI.h>
 #include <ros.h>
 #include "pid_controller.hpp"
-
-
+#include <agc/AGC.h>
+#include <agc/Auto.h>
 // -------------------------------------- Actuators ---------------------------------------------------
 
 // Drive Motor
@@ -34,14 +34,15 @@ unsigned long steering_time;
 const float steeringFB_bounds[2] = {362,520};
 
 // Speed Encoder
-#define ENCODER_IN 2
+#define ENA 3
+#define ENB 2
 #define Ratio 38.4
-volatile int Count;
+volatile int CtT;
 unsigned long speed_time[2];
 float v_meas;
 
 // Steering Wheel 
-#define STEERING_WHEEL_IN 3
+#define STEERING_WHEEL_IN 19
 
 // -------------------------------------- Controllers ---------------------------------------------------
 
@@ -49,10 +50,9 @@ float v_meas;
 bool autonomy = false;
 
 // Steering Controller
-const float steeringU_bounds[2] = {-30,30};
-float phi_sp = 0;
+const float potBounds[2] = {-30,30};
+float pot_sp = 0;
 PIDController Steering(1,4,2);
-Steering.setControllerLimits(steeringU_bounds[0],steeringU_bounds[1]);
 
 // Speed Controller
 const int motor_bounds[2] = {51,200};
@@ -61,20 +61,22 @@ float v_sp = 0;
 float brake_sp = 0;
 float v_thresh = -0.5;
 
-
-// ROS Setup
+// -------------------------------------- ROS Setup ---------------------------------------------------
 ros::NodeHandle nh;
-ros::Subscriber<INSERT TOPIC TYPE HERE> sub(INSERT TOPIC NAME HERE, commandCB);
-ros::Publisher pub("llc\feedback", &msg);
+ros::Subscriber<agc::AGC> cmdSub("/supervisor/cmd", commandCB);
+ros::Publisher fbPub("/llc/feedback", &fb_msg);
+ros::Publisher autoPub("/llc/autonomy", &auto_msg)
 
+agc::AGC fb_msg;
+agc::Auto auto_msg;
 
-void commandCB(const INSERT_MESSAGE_TYPE& msg){
-    autonomy = msg.INSERT_FIELD_HERE;
-    V_sp = msg.INSERT_FIELD_HERE;
-    phi_sp = msg.INSERT_FIELD_HERE;
+void commandCB(const agc::AGC& msg){
+    autonomy = msg.autonomous;
+    pot_sp = max(potBounds[0],min(4.325*(msg.steering_angle) + 513.2,potBounds[1]));
+    v_sp = msg.speed;
 }
 
-
+// -------------------------------------- Arduino Setup ---------------------------------------------------
 void setup(){
     Serial.begin(115200);
 
@@ -101,12 +103,15 @@ void setup(){
     pinMode(BACKWARDS,OUTPUT);
 
     // Encoder Setup
-    pinMode(ENCODER_IN,INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(ENCODER_IN),SPEED,CHANGE);
+    pinMode(ENA,INPUT_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(ENA),CTA,CHANGE);
+
+    pinMode(ENB,INPUT_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(ENB),CTB,CHANGE);
 
     // Steering Wheel Interrupt Setup
     pinMode(STEERING_WHEEL_IN,INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(ENCODER_IN),DISENGAGE,CHANGE);
+    attachInterrupt(digitalPinToInterrupt(STEERING_WHEEL_IN),DISENGAGE,CHANGE);
 
     // Electromagnet Setup
     pinMode(ELECTROMAGNETS,OUTPUT);
@@ -114,34 +119,41 @@ void setup(){
     
    // Start ROS
     nh.initNode();
-    nh.subsribe(sub);
-    nh.advertise(pub);
+    nh.subscribe(cmdSub);
+    nh.advertise(fbPub);
+    nh.advertise(autoPub);
+
 }
 
-void loop(){
-    if(autonomy){
-        // Measure sensor values
-        measureSteering();
-        measureSpeed();
+//  -------------------------------------- Main Loop ---------------------------------------------------
 
-        // Actuate system
+void loop(){
+    measureSteering();
+    measureSpeed();
+    feedback();
+
+    actuateElectromagnet(autonomy);
+
+    if(autonomy){
         actuateSteering();
         actuateSpeed();
     }
-    // Send Feedback to ROS
-    feedback();
+
     nh.spinOnce();
 }
 
+// -------------------------------------- Helper Functions ---------------------------------------------------
+
 void measureSteering(){
     steering_time = millis();
-    phi_meas = map(analogRead(STEERING_FB),steeringFB_bounds[0],steeringFB_bounds[1],steeringU_bounds[0],steeringU_bounds[1])
+    potMeasured = analogRead(STEERING_FB);
 }
 
 void measureSpeed(){
     speed_time[1] = millis();
-    v_meas = (Count*Ratio)/(speed_time[1]-speed_time[0]);
+    v_meas = (CtT*Ratio)/(speed_time[1]-speed_time[0]);
     speed_time[0] = speed_time[1];
+    CtT = 0;
 }
 
 void actuateSteering(){
@@ -174,10 +186,10 @@ void actuateMotor(float u){
 
 void actuateBrake(float u){
     digitalWrite(BRAKES_INHIBIT,LOW);
-    analogWrite(BRAKES_DRIVE,int(u));
+    analogWrite(BRAKES_DRIVE,int(255*u));
 }
 
-void electromagnet(bool state){
+void actuateElectromagnet(bool state){
     digitalWrite(ELECTROMAGNETS,state);
 }
 
@@ -190,14 +202,37 @@ void halt(){
 }
 
 void feedback(){
-    pub.publish(&msg);
-}
-
-void SPEED(){
-    Count++;
+    fbPub.publish(&fb_msg);
+    autoPub.publish(&auto_msg);
 }
 
 void DISENGAGE(){
     autonomy = false;
     electromagnet(false);
+}
+
+void CountA(){
+    bool EnA_status = digitalRead(EnA);
+    bool EnB_status = digitalRead(EnB);
+    if(EnB_status == LOW){
+        if(EnA_status == HIGH){CtT --;}
+        else{CtT++;}
+    }
+    else{
+        if(EnA_status == HIGH){CtT++;}
+        else{CtT--;}
+    }
+}
+
+void CountB(){
+    bool EnA_status = digitalRead(EnA);
+    bool EnB_status = digitalRead(EnB);
+    if(EnA_status == LOW){
+        if(EnB_status == HIGH){CtT ++;}
+        else{CtT--;}
+    }
+    else{
+        if(EnB_status == HIGH){CtT--;}
+        else{CtT++;}
+    }
 }
