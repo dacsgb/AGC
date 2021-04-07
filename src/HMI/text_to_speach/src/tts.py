@@ -11,7 +11,7 @@ class TTS():
         self.engine.setProperty('rate',120)
         self.engine.setProperty('voice', self.engine.getProperty('voices')[11].id)
 
-        self.text_sub = rospy.Subscriber("/HMI/tts",String,self.text_cb)
+        self.text_sub = rospy.Subscriber("\supervisor\tts",String,self.text_cb)
         self.rate = rospy.Rate(5)
 
     def text_cb(self,msg):
