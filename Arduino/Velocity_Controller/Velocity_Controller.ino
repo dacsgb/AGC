@@ -1,8 +1,10 @@
+// -------------------------------------- Libraries ---------------------------------------------------
+
 #include <SPI.h>
 #include <ros.h>
-#include "pid_controller.hpp"
 #include <agc/AGC.h>
 #include <agc/Auto.h>
+
 // -------------------------------------- Actuators ---------------------------------------------------
 
 // Drive Motor
@@ -15,31 +17,34 @@
 #define BRAKES_INHIBIT 5
 
 // Steering Motor
-#define STEERING_DRIVE 6
-#define STEERING_INHIBIT 7
+#define STEERING_DRIVE 10
+#define STEERING_INHIBIT 11
 
 // Gear Selector
 #define FORWARD 8
 #define BACKWARDS 9
 
 // Electromagnets
-#define ELECTROMAGNETS 10
+#define ELECTROMAGNETS 12
+
+// Drive selector and SSR
+#define DS 23
+#define SSR 13
 
 // -------------------------------------- Sensors ---------------------------------------------------
 
 // Steering Potentiometer
 #define STEERING_FB A0
-float phi_meas;
-unsigned long steering_time;
-const float steeringFB_bounds[2] = {362,520};
+int potMeas;
+const float potBounds[2] = {370,600};
 
 // Speed Encoder
-#define ENA 3
-#define ENB 2
+#define EnA 3
+#define EnB 2
 #define Ratio 38.4
 volatile int CtT;
 unsigned long speed_time[2];
-float v_meas;
+float vMeas;
 
 // Steering Wheel 
 #define STEERING_WHEEL_IN 19
@@ -47,36 +52,37 @@ float v_meas;
 // -------------------------------------- Controllers ---------------------------------------------------
 
 // Supervisor
-bool autonomy = false;
+bool autonomy = true;
 
 // Steering Controller
-const float potBounds[2] = {-30,30};
-float pot_sp = 0;
-PIDController Steering(1,4,2);
+float potSP = 512;
+float steeringKp = 2;
 
 // Speed Controller
 const int motor_bounds[2] = {51,200};
 const float speed_bounds[2][2] = {{0, 3.0},{-0.5,0}};
-float v_sp = 0;
+float vSp = 0;
 float brake_sp = 0;
 float v_thresh = -0.5;
 
 // -------------------------------------- ROS Setup ---------------------------------------------------
-ros::NodeHandle nh;
-ros::Subscriber<agc::AGC> cmdSub("/supervisor/cmd", commandCB);
-ros::Publisher fbPub("/llc/feedback", &fb_msg);
-ros::Publisher autoPub("/llc/autonomy", &auto_msg)
+/*
+void commandCB(const agc::AGC& msg){
+    autonomy = msg.autonomous;
+    potSP = max(potBounds[0],min(4.325*(msg.steering_angle) + 513.2,potBounds[1]));
+    v_sp = msg.speed;
+}
 
 agc::AGC fb_msg;
 agc::Auto auto_msg;
 
-void commandCB(const agc::AGC& msg){
-    autonomy = msg.autonomous;
-    pot_sp = max(potBounds[0],min(4.325*(msg.steering_angle) + 513.2,potBounds[1]));
-    v_sp = msg.speed;
-}
-
+ros::NodeHandle nh;
+ros::Subscriber<agc::AGC> cmdSub("/supervisor/cmd", commandCB);
+ros::Publisher fbPub("/llc/feedback", &fb_msg);
+ros::Publisher autoPub("/llc/autonomy", &auto_msg);
+*/
 // -------------------------------------- Arduino Setup ---------------------------------------------------
+
 void setup(){
     Serial.begin(115200);
 
@@ -103,11 +109,11 @@ void setup(){
     pinMode(BACKWARDS,OUTPUT);
 
     // Encoder Setup
-    pinMode(ENA,INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(ENA),CTA,CHANGE);
+    pinMode(EnA,INPUT_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(EnA),CountA,CHANGE);
 
-    pinMode(ENB,INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(ENB),CTB,CHANGE);
+    pinMode(EnB,INPUT_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(EnB),CountB,CHANGE);
 
     // Steering Wheel Interrupt Setup
     pinMode(STEERING_WHEEL_IN,INPUT_PULLUP);
@@ -115,73 +121,91 @@ void setup(){
 
     // Electromagnet Setup
     pinMode(ELECTROMAGNETS,OUTPUT);
-    electromagnet(true);
+
+    // SSR Setup
+    pinMode(SSR,OUTPUT);
+
+    // DS Setup
+    pinMode(DS, OUTPUT);
     
-   // Start ROS
+    // Start ROS
+    /*
     nh.initNode();
-    nh.subscribe(cmdSub);
+    h.subscribe(cmdSub);
     nh.advertise(fbPub);
     nh.advertise(autoPub);
-
+    */
 }
 
 //  -------------------------------------- Main Loop ---------------------------------------------------
 
 void loop(){
     measureSteering();
-    measureSpeed();
-    feedback();
-
+    //measureSpeed();
+    //feedback();
+    
     actuateElectromagnet(autonomy);
 
     if(autonomy){
-        actuateSteering();
-        actuateSpeed();
+        digitalWrite(SSR, autonomy);
+        digitalWrite(DS, autonomy);
+        actuateSteering(potSP, potMeas, steeringKp);
+        //actuateSpeed(vSp, vMeas);
+        actuateMotor(150);
+    }
+    else{
+        digitalWrite(DS, autonomy);
+        digitalWrite(SSR,autonomy);
+        halt();
     }
 
-    nh.spinOnce();
+    //nh.spinOnce();
 }
 
 // -------------------------------------- Helper Functions ---------------------------------------------------
 
 void measureSteering(){
-    steering_time = millis();
-    potMeasured = analogRead(STEERING_FB);
+    long cumAvg = 0;
+    for(int i = 0; i< 100; i++){cumAvg += analogRead(STEERING_FB);}
+    potMeas = cumAvg/100;
 }
 
 void measureSpeed(){
     speed_time[1] = millis();
-    v_meas = (CtT*Ratio)/(speed_time[1]-speed_time[0]);
+    vMeas = (CtT*Ratio)/(speed_time[1]-speed_time[0]);
     speed_time[0] = speed_time[1];
     CtT = 0;
 }
 
-void actuateSteering(){
-    Steering.computeControl(phi_sp,phi_meas,steering_time)
+void actuateSteering(float sp, float est, float kp){
+    float u = 127 + kp*map((sp-est),potBounds[0] - potBounds[1],potBounds[1] - potBounds[0],-120,120);
+    
     digitalWrite(STEERING_INHIBIT, LOW);
-    analogWrite(STEERING_DRIVE, int(Steering.control));
+    analogWrite(STEERING_DRIVE, int(u));
 }
 
-void actuateSpeed(){
-    if((v_sp - v_meas + v_thresh) > 0){
+
+void actuateSpeed(float sp, float est){
+    digitalWrite(SSR, HIGH);
+    if((sp - est + v_thresh) > 0){
         // Accelerating or coasting
-        actuateMotor(v_sp);
+        actuateMotor(sp);
     }
-    else if ((v_sp-v_meas + v_thresh) < 0 ){
+    else{
         //Braking
-        actuateMotor(v_sp);
-        actuateBrake();
+        actuateMotor(sp);                                                                                     
+        //actuateBrake(20);
     }
 }
 
 // TODO: Add reverse mapping and gear selection
+
 void actuateMotor(float u){
-    u = map(u,V_bounds[0],V_bounds[1],Pot_bounds[0],Pot_bounds[1]);
-    V_sp = max(V_bounds[0],min(V_bounds[1],V));
-    digitalWrite(MOTOR, LOW);
+    u = max(0,min(u,255));
+    digitalWrite(MOTOR_SS, LOW);
     SPI.transfer(address);
-    SPI.transfer(int(V_sp));
-    digitalWrite(MOTOR, HIGH);
+    SPI.transfer(int(u));
+    digitalWrite(MOTOR_SS, HIGH);
 }
 
 void actuateBrake(float u){
@@ -201,14 +225,20 @@ void halt(){
     analogWrite(STEERING_DRIVE, int(127.5));
 }
 
+
 void feedback(){
-    fbPub.publish(&fb_msg);
-    autoPub.publish(&auto_msg);
+    //fbPub.publish(&fb_msg);
+    //autoPub.publish(&auto_msg);
+
+    Serial.print("Measured Pot Value: ");
+    Serial.print("\t");
+    Serial.println(potMeas);
+    
 }
 
 void DISENGAGE(){
     autonomy = false;
-    electromagnet(false);
+    actuateElectromagnet(false);
 }
 
 void CountA(){
