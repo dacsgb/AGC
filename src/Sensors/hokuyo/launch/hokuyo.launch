@@ -1,7 +1,8 @@
 <launch>
 
     <node pkg="tf" type="static_transform_publisher" name="hokuyo_tf" args="1.97 0 0.11 0 0 0 1 /base_link /hokuyo 100"/>
-    <!--node name="urg_node" pkg="urg_node" type="urg_node" output="screen">
+    
+    <node name="urg_node" pkg="urg_node" type="urg_node" output="screen">
         <remap from="/scan" to="/hokoyu/scan"/>
         <param name="ip_address" value="192.168.0.10"/>
         <param name="serial_port" value="/dev/ttyACM0"/>                                                                            
@@ -12,6 +13,6 @@
         <param name="publish_multiecho" value="false"/>
         <param name="angle_min" value="-1.5707963"/>
         <param name="angle_max" value="1.5707963"/>
-    </node-->
+    </node>
 
 </launch>
