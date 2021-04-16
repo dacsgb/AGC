@@ -2,7 +2,7 @@
 
     <!-- Initialize Supervisor -->
 
-        <node pkg="agc" type="supervisor.py" name="agc_supervisor" respawn="true"/>
+        <!--node pkg="agc" type="supervisor.py" name="agc_supervisor" respawn="true"/-->
 
     <!-- Initialize Sensors -->
 
@@ -33,7 +33,7 @@
 
         <!--node pkg="dashboard" type="dash.py" name="dashboard"/-->
         
-        <node pkg="text_to_speach" type="tts.py" name="tts_node" respawn="true"/>
+        <!--node pkg="text_to_speach" type="tts.py" name="tts_node" respawn="true"/-->
 
     
     <!-- Initialize Percepion-->
