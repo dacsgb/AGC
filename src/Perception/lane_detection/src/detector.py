@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 
 import rospy
+from std_msgs.msg import Float32
 from sensor_msgs.msg import Image, CompressedImage, CameraInfo
 from cv_bridge import CvBridge, CvBridgeError
 
@@ -19,6 +20,9 @@ class Detector():
         self.img_sub = rospy.Subscriber("/{}/image_color".format(camera),Image,self.imgCB)
         self.cam_sub = rospy.Subscriber("/{}/camera_info".format(camera),CameraInfo,self.camCB)
         self.img = None
+        
+        self.err_pub = rospy.Publisher("/PER/lane_detection/cross_error",Float32,queue_size=1)
+        self.err = Float32
 
         self.colorMasks = np.array([[[0,0,200],[255,55,255]],
                                     [[22,93,0],[45,255,255]]])
@@ -86,24 +90,23 @@ class Detector():
         rate = rospy.Rate(60)
         while not rospy.is_shutdown():
             if self.img is not None:
+
                 undist = self.undistort(self.img)
                 bev = self.BEV(undist)
                 markers = self.markers(bev,self.colorMasks)
                 fits = self.fit(markers)
                 estimate, err = self.est(bev,fits)
-                
-                print("Positioning Error = {:.3f} [m]".format(3.048*err/1003))
-                
-                predict = self.draw_lanes(markers,fits)
-                self.display(undist,bev,predict,estimate)
+
+                self.err_pub.publish(3.048*err/1003)
+
+                #predict = self.draw_lanes(markers,fits)
+                #self.display(undist,bev,predict,estimate)
 
             rate.sleep()
-
 
 if __name__ == "__main__":
     rospy.init_node("lane_detector")
     
     camera = rospy.get_param("~camera", default=None)
-
     Node = Detector(camera)
     Node.run()
