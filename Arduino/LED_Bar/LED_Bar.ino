@@ -24,7 +24,7 @@ void messagecb(const std_msgs::String& str) {
 
 //Ros
 ros::NodeHandle nh;
-ros::Subscriber<std_msgs::String> sub("HMI/led", messagecb);
+ros::Subscriber<std_msgs::String> sub("SUP/led", messagecb);
 
 void ScanDMD(){dmd.scanDisplayBySPI();}
 

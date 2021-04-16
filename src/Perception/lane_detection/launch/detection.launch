@@ -1,5 +1,0 @@
-<launch>
-
-    <node pkg="lane_detection" name="lane_detector" type="detector_BEV.py" respawn="true"/>
-
-</launch>

@@ -3,26 +3,29 @@
 import numpy as np
 
 import rospy
-import rosnode
-
-from agc.msgs import AGC
+from agc.msg import AGC, Auto
 from std_msgs.msg import String
 
-def Supervisor():
+class Supervisor():
     def __init__(self):
 
         self.ϕ = 0.0
-        self.v = np.array([0.0,0.0])
+        self.v = np.array([0.0,0.0,0.0])
+        self.auto = False
 
-        self.nodes = rosnode.get_node_names()
-        self.rate = rospy.Rate(20)
+        self.rate = rospy.Rate(50)
 
-        self.laneTrackingSub = rospy.Subscriber("\laneTracking\cmd",AGC,self.laneTrackingCB)
-        self.accSub = rospy.Subscriber("\acc\cmd",AGC,self.accCB)
+        self.dashSub = rospy.Subscriber("/HMI/dash_autonomy",Auto,self.dashCB)
+        self.joy_contSub = rospy.Subscriber("/CONT/joy_cmd",AGC,self.joyCB)
+        self.laneTrackingSub = rospy.Subscriber("/CONT/laneTracking_cmd",AGC,self.laneTrackingCB)
+        self.accSub = rospy.Subscriber("/CONT/acc_cmd",AGC,self.accCB)
 
-        self.supervisorPub = rospy.Publisher("\supervisor\cmd",AGC,queue_size=1)
-        self.ttsPub = rospy.Publisher("\supervisor\tts",String,queue_size=1)
-        self.tts = String()
+        self.supervisorPub = rospy.Publisher("/SUP/cmd",AGC,queue_size=1)
+        self.ttsPub = rospy.Publisher("/SUP/tts",String,queue_size=1)
+        self.ledPub = rospy.Publisher("/SUP/led",String,queue_size=1)
+
+    def dashCB(self,msg):
+        pass
 
     def laneTrackingCB(self,msg):
         self.ϕ = msg.steering_angle
@@ -30,23 +33,35 @@ def Supervisor():
 
     def accCB(self,msg):
         self.v[1] = msg.speed
+    
+    def joyCB(self,msg):
+        self.auto = msg.autonomous
+        self.ϕ = msg.steering_angle
+        self.v[2] = msg.speed
 
-    def cmd_publish(self):
+    def cmd_publish(self,auto,u):
         cmd = AGC()
-        cmd.autonomous = False
-        cmd.speed = np.min(self.v)
-        cmd.steering_angle = self.ϕ
+        cmd.autonomous = auto
+        cmd.speed = u[0]
+        cmd.steering_angle = u[1]
         self.supervisorPub.publish(cmd)
     
     def tts_publish(self,text):
         tts = String()
         tts.data = text
         self.ttsPub.publish(tts)
+    
+    def led_publish(self,text):
+        led = String()
+        led.data = text
+        self.ledPub(led)
 
     def run(self):
         self.tts_publish("Supervisor online")
         while not rospy.is_shutdown():
-            self.cmd_publish()
+
+            self.cmd_publish(self.auto,[self.v[2],self.ϕ])
+
             self.rate.sleep()
         self.tts_publish("Supervisor offline")
 

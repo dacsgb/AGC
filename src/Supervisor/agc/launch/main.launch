@@ -1,21 +1,56 @@
 <launch>
 
-    <!-- Initialize Sensors -->
-    <include file="$(find agc)/launch/sensors.launch"/>
+    <!-- Initialize Supervisor -->
 
+        <node pkg="agc" type="supervisor.py" name="agc_supervisor" respawn="true"/>
+
+    <!-- Initialize Sensors -->
+
+        <include file="$(find pointgrey_camera)/launch/ptgrey.launch">
+            <arg name="camera_name"     value="pointgrey_center" />
+            <arg name="camera_serial"   value="18295827" />
+            <arg name="frame_rate"      value="20"/>
+            <arg name="calibrated"      value="1" />
+            <arg name="calib_file"      value="file://$(find pointgrey_camera)/calibrations/SN18295827.yaml"/>
+        </include>
+
+        <!--node pkg="usb_cam_driver" name="usb_camera_feed" type="usb_camera.py" respawn="true">
+            <param name="width" value="640"/>
+            <param name="height" value="480"/>
+            <param name="fps"   value="30"/>
+            <param name="topic_name" value="/usb_camera"/>
+            <param name="camera_num" value="0"/>
+        </node-->
 
     <!-- Initialize HMI-->
-    <!--node pkg="joystick" type="joystick.py" name="joystick_node"/-->
-    <!--node pkg="dashboard" type="dash.py" name="dashboard"/-->
-    <!--node pkg="rosserial_python" type="serial_node.py" name="led_serial" args="_port:=/dev/ttyACM0 _baud:=57600" respawn="true"/-->
-    <node pkg="text_to_speach" type="tts.py" name="tts_node" respawn="true"/>
 
+        <!--node pkg="joystick" type="joystick.py" name="joystick_node"/-->
+
+        <!--node pkg="rosserial_python" type="serial_node.py" name="led_panel" respawn="true">
+            <param name="port" value="/dev/ttyACM0"/>
+            <param name="baud" value="57600"/>
+        </node-->
+
+        <!--node pkg="dashboard" type="dash.py" name="dashboard"/-->
+        
+        <node pkg="text_to_speach" type="tts.py" name="tts_node" respawn="true"/>
+
+    
     <!-- Initialize Percepion-->
-    <!--include file="$(find agc)/launch/perception.launch"/-->
+
+        <include file="$(find lane_detection)/launch/lane_detect.launch">
+            <arg name="camera_name"    value="pointgrey_center"/>
+        </include>
 
     <!-- Initialize Controllers-->
-    <!--node pkg="joy_control" type="joy_cont.py" name="joystick_controller"/-->
+
+        <!--node pkg="joy_control" type="joy_cont.py" name="joystick_controller"/-->
 
     <!-- Initilize Actuators-->
-    
+
+        <!--node pkg="rosserial_python" type="serial_node.py" name="actuators" respawn="true">
+            <param name="port" value="/dev/ttyACM0"/>
+            <param name="baud" value="57600"/>
+        </node-->
+
 </launch>

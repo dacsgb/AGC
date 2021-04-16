@@ -4,7 +4,7 @@ import numpy as np
 import time
 
 import rospy
-from agc.msgs import AGC, Auto
+from agc.msg import AGC, Auto
 from GUI import Ui_Dialog
 
 import sys
@@ -17,11 +17,11 @@ class Node():
     def __init__(self):
 
         # ROS Subscribers
-        self.fb_sub = rospy.Subscriber("\llc\feedback",AGC, self.fb_cb)
-        self.sup_sub = rospy.Subscriber("\supervisor\autonomy", Auto,self.auto_cb)
+        self.fb_sub = rospy.Subscriber("/LLC/feedback",AGC, self.fb_cb)
+        self.sup_sub = rospy.Subscriber("/SUP/cmd", Auto,self.auto_cb)
 
         # Ros Publishers
-        self.auto_pub = rospy.Publisher('dahsboard\autonomy',Auto,queue_size=1)
+        self.auto_pub = rospy.Publisher('/HMI/dash_autonomy',Auto,queue_size=1)
 
         # Message Variables
         self.ϕ = 0.0

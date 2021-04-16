@@ -1,0 +1,8 @@
+<launch>
+    <arg name="camera_name" default="0"/>
+
+    <node pkg="lane_detection" type="detector.py" name="lane_detector" output="screen">
+        <param name="~camera" value="$(arg camera_name)"/>
+    </node>
+
+</launch>

@@ -3,49 +3,41 @@
 import numpy as np
 
 import rospy
-from std_msgs.msg import Header
-from automotive_platform_msgs.msg import Speed, SteeringCommand
+from agc.msg import AGC
 from sensor_msgs.msg import Joy
 
 class Converter():
     def __init__(self):
         self.rate = rospy.Rate(100)
 
-        self.h = Header()
-
-        self.speed_pub = rospy.Publisher("/CMD/speed",Speed,queue_size=1)
-        self.speed_msg = Speed()
-        self.speed_msg.acceleration_limit = 0
-        self.speed_msg.deceleration_limit = 0
-
-        self.steer_pub = rospy.Publisher("/CMD/steer",SteeringCommand,queue_size=1)
-        self.steer_msg = SteeringCommand()
-
         self.joy_sub = rospy.Subscriber("/HMI/joystick",Joy,self.joy_cb)
 
+        self.cmd_pub = rospy.Publisher("/CONT/joy_cmd",AGC,queue_size=1)
+        self.agc = AGC()
+        self.agc.autonomous = False
+        self.last = [0,0]
+
     def joy_cb(self,msg):
+        self.agc.header.stamp = rospy.Time.now()
+
+        if msg.buttons[6] == 1:
+            if (msg.header.seq - self.last[0] > 25 ):
+                self.last = [msg.header.seq, msg.buttons[6]]
+                self.agc.autonomous = not self.agc.autonomous
+
         if abs(msg.axes[1]) >= 0.1:
-            self.h.stamp = rospy.Time.now()
-            self.speed_msg.header = self.h
-            self.speed_msg.speed = -5*msg.axes[1]
+            self.agc.speed = -3*msg.axes[1]
         else:
-            self.h.stamp = rospy.Time.now()
-            self.speed_msg.header = self.h
-            self.speed_msg.speed = 0
+            self.agc.speed = 0
 
         if abs(msg.axes[3]) >= 0.1:
-            self.h.stamp = rospy.Time.now()
-            self.steer_msg.header = self.h
-            self.steer_msg.steering_wheel_angle = np.deg2rad(30*msg.axes[3])
+            self.agc.steering_angle = -np.deg2rad(30*msg.axes[3])
         else:
-            self.h.stamp = rospy.Time.now()
-            self.steer_msg.header = self.h
-            self.steer_msg.steering_wheel_angle = 0
+            self.agc.steering_angle = 0
 
     def run(self):
         while not rospy.is_shutdown():
-            self.speed_pub.publish(self.speed_msg)
-            self.steer_pub.publish(self.steer_msg)
+            self.cmd_pub.publish(self.agc)
             self.rate.sleep()
 
 if __name__ == "__main__":

@@ -1,6 +1,0 @@
-<launch>
-
-    <!-- Flir Center Camera -->
-    <node pkg="tf" type="static_transform_publisher" name="flir_center" args="1.53 0 0.795 -0.5416752, 0.5416752, -0.4545195, 0.4545195 /base_link /flir_center 100"/>
-
-</launch>

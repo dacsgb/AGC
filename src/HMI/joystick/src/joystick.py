@@ -22,10 +22,10 @@ class Joystick():
     def fill(self):
         self.msg.header.stamp = rospy.Time.now()
 
-        for i in range(0,len(self.msg.axes)):
+        for i in range(len(self.msg.axes)):
             self.msg.axes[i]= self.stick.get_axis(i)
-        
-        for i in range(0,len(self.msg.buttons)-2):
+
+        for i in range(len(self.msg.buttons)-2):
             self.msg.buttons[i] = self.stick.get_button(i)
 
         self.msg.buttons[-2] = self.stick.get_hat(0)[0]
@@ -36,8 +36,16 @@ class Joystick():
 
     def run(self):
         while not rospy.is_shutdown():
-            pygame.event.pump() 
-            self.fill()
+
+            for event in pygame.event.get():
+                if event.type == pygame.JOYBUTTONDOWN:
+                    self.msg.buttons[event.button] = 1
+                elif event.type == pygame.JOYBUTTONUP:
+                    self.msg.buttons[event.button] = 0
+                
+                elif event.type == pygame.JOYAXISMOTION:
+                    self.msg.axes[event.axis] = event.value
+
             self.pub()
             self.rate.sleep()
 
