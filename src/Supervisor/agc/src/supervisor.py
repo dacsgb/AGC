@@ -3,7 +3,7 @@
 import numpy as np
 
 import rospy
-from agc.msg import AGC, Auto
+from agc.msg import AGC, StampedFloat
 from std_msgs.msg import String
 
 class Supervisor():
@@ -11,13 +11,13 @@ class Supervisor():
 
         self.ϕ = 0.0
         self.v = np.array([0.0,0.0,0.0])
-        self.auto = False
+        self.auto = True
 
         self.rate = rospy.Rate(50)
 
         self.dashSub = rospy.Subscriber("/HMI/dash_autonomy",Auto,self.dashCB)
         self.joy_contSub = rospy.Subscriber("/CONT/joy_cmd",AGC,self.joyCB)
-        self.laneTrackingSub = rospy.Subscriber("/CONT/laneTracking_cmd",AGC,self.laneTrackingCB)
+        self.laneTrackingSub = rospy.Subscriber("/CONT/laneTracking/steering",StampedFloat,self.laneTrackingCB)
         self.accSub = rospy.Subscriber("/CONT/acc_cmd",AGC,self.accCB)
 
         self.supervisorPub = rospy.Publisher("/SUP/cmd",AGC,queue_size=1)
@@ -28,8 +28,7 @@ class Supervisor():
         pass
 
     def laneTrackingCB(self,msg):
-        self.ϕ = msg.steering_angle
-        self.v[0] = msg.speed
+        self.ϕ = msg.data
 
     def accCB(self,msg):
         self.v[1] = msg.speed
@@ -60,7 +59,7 @@ class Supervisor():
         self.tts_publish("Supervisor online")
         while not rospy.is_shutdown():
 
-            self.cmd_publish(self.auto,[self.v[2],self.ϕ])
+            self.cmd_publish(self.auto,[0,self.ϕ])
 
             self.rate.sleep()
         self.tts_publish("Supervisor offline")

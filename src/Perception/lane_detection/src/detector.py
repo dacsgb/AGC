@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 
 import rospy
-from std_msgs.msg import Float32
+from agc.msgs import StampedFloat
 from sensor_msgs.msg import Image, CompressedImage, CameraInfo
 from cv_bridge import CvBridge, CvBridgeError
 
@@ -15,13 +15,12 @@ class Detector():
         if camera == None:
             print("No camera topic given")
             exit()
-        
 
         self.img_sub = rospy.Subscriber("/{}/image_color".format(camera),Image,self.imgCB)
         self.cam_sub = rospy.Subscriber("/{}/camera_info".format(camera),CameraInfo,self.camCB)
         self.img = None
         
-        self.err_pub = rospy.Publisher("/PER/lane_detection/cross_error",Float32,queue_size=1)
+        self.err_pub = rospy.Publisher("/PER/lane_detection/cross_error",StampedFloat,queue_size=1)
         self.err = Float32
 
         self.colorMasks = np.array([[[0,0,200],[255,55,255]],
@@ -86,6 +85,11 @@ class Detector():
         cv2.imshow("Masks",res)
         cv2.waitKey(3)
 
+    def publishErr(self,err):
+        msg = StampedFloat()
+        msg.data = 3.048*err/1003
+        msg.time = rospy.Time()
+
     def run(self): 
         rate = rospy.Rate(60)
         while not rospy.is_shutdown():
@@ -99,8 +103,8 @@ class Detector():
 
                 self.err_pub.publish(3.048*err/1003)
 
-                #predict = self.draw_lanes(markers,fits)
-                #self.display(undist,bev,predict,estimate)
+                predict = self.draw_lanes(markers,fits)
+                self.display(undist,bev,predict,estimate)
 
             rate.sleep()
 
