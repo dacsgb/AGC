@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 
 import rospy
-from agc.msgs import StampedFloat
+from agc.msg import StampedFloat
 from sensor_msgs.msg import Image, CompressedImage, CameraInfo
 from cv_bridge import CvBridge, CvBridgeError
 
@@ -112,5 +112,6 @@ if __name__ == "__main__":
     rospy.init_node("lane_detector")
     
     camera = rospy.get_param("~camera", default=None)
+    camera = "pointgrey_center"
     Node = Detector(camera)
     Node.run()
