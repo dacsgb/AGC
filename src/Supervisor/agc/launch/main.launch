@@ -1,9 +1,5 @@
 <launch>
 
-    <!-- Initialize Supervisor -->
-
-        <!--node pkg="agc" type="supervisor.py" name="agc_supervisor" respawn="true"/-->
-
     <!-- Initialize Sensors -->
 
         <include file="$(find pointgrey_camera)/launch/ptgrey.launch">
@@ -27,24 +23,26 @@
         <!--node pkg="joystick" type="joystick.py" name="joystick_node"/-->
 
         <!--node pkg="rosserial_python" type="serial_node.py" name="led_panel" respawn="true">
-            <param name="port" value="/dev/ttyACM0"/>
+            <param name="port" value="/dev/ttyACM1"/>
             <param name="baud" value="57600"/>
         </node-->
 
         <!--node pkg="dashboard" type="dash.py" name="dashboard"/-->
         
-        <!--node pkg="text_to_speach" type="tts.py" name="tts_node" respawn="true"/-->
+        <node pkg="text_to_speach" type="tts.py" name="tts_node" respawn="true" output="screen"/>
 
     
     <!-- Initialize Percepion-->
 
-        <include file="$(find lane_detection)/launch/lane_detect.launch">
+        <!--include file="$(find lane_detection)/launch/lane_detect.launch">
             <arg name="camera_name"    value="pointgrey_center"/>
-        </include>
+        </include-->
 
     <!-- Initialize Controllers-->
 
         <!--node pkg="joy_control" type="joy_cont.py" name="joystick_controller"/-->
+
+        <!--node pkg="lane_tracking" type="lane_tracker.py" name="lane_tracker" output="screen"/-->
 
     <!-- Initilize Actuators-->
 
@@ -52,5 +50,10 @@
             <param name="port" value="/dev/ttyACM0"/>
             <param name="baud" value="57600"/>
         </node-->
+
+    <!-- Initialize Supervisor -->
+
+        <node pkg="agc" type="supervisor.py" name="agc_supervisor" respawn="true" output="screen"/>
+
 
 </launch>
