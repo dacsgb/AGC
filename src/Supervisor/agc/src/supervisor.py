@@ -3,7 +3,7 @@
 import numpy as np
 
 import rospy
-from agc.msg import AGC, StampedFloat
+from agc.msg import AGC, StampedFloat, Auto
 from std_msgs.msg import String
 
 class Supervisor():
@@ -16,13 +16,13 @@ class Supervisor():
         self.rate = rospy.Rate(50)
 
         self.dashSub = rospy.Subscriber("/HMI/dash_autonomy",Auto,self.dashCB)
-        self.joy_contSub = rospy.Subscriber("/CONT/joy_cmd",AGC,self.joyCB)
-        self.laneTrackingSub = rospy.Subscriber("/CONT/laneTracking/steering",StampedFloat,self.laneTrackingCB)
+        #self.joy_contSub = rospy.Subscriber("/CONT/joy_cmd",AGC,self.joyCB)
+        self.laneTrackingSub = rospy.Subscriber("/CONT/lane_tracking/steering",StampedFloat,self.laneTrackingCB)
         self.accSub = rospy.Subscriber("/CONT/acc_cmd",AGC,self.accCB)
 
         self.supervisorPub = rospy.Publisher("/SUP/cmd",AGC,queue_size=1)
         self.ttsPub = rospy.Publisher("/SUP/tts",String,queue_size=1)
-        self.ledPub = rospy.Publisher("/SUP/led",String,queue_size=1)
+        self.ledPub = rospy.Publisher("SUP/led",String,queue_size=1)
 
     def dashCB(self,msg):
         pass
@@ -53,16 +53,12 @@ class Supervisor():
     def led_publish(self,text):
         led = String()
         led.data = text
-        self.ledPub(led)
+        self.ledPub.publish(led)
 
     def run(self):
-        self.tts_publish("Supervisor online")
         while not rospy.is_shutdown():
-
             self.cmd_publish(self.auto,[0,self.ϕ])
-
             self.rate.sleep()
-        self.tts_publish("Supervisor offline")
 
 if __name__ == "__main__":
     rospy.init_node("agc_supervisor")
